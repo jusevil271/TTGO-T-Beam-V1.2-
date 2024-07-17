@@ -1,0 +1,75 @@
+TTGOTBEAMOLED1306/CODE
+Entiendo, parece que el escáner I2C está detectando dos dispositivos en las direcciones `0x34` y `0x3C`. Esto podría indicar que tienes dos dispositivos conectados al bus I2C, o que hay alguna confusión con las direcciones detectadas.
+
+### Interpretación de las Direcciones I2C
+
+- **0x34**: Esta dirección puede corresponder a un dispositivo I2C real o puede ser un error en la detección (a veces las direcciones se muestran incorrectamente).
+- **0x3C**: Esta es la dirección que esperas para tu pantalla OLED SSD1306.
+
+### Solución de Problemas
+
+1. **Verifica las Conexiones Físicas**: Asegúrate de que solo tienes la pantalla OLED conectada al TTGO T-Beam y que no hay otros dispositivos I2C conectados accidentalmente.
+
+2. **Desconexión Temporal**: Intenta desconectar temporalmente la pantalla OLED y ejecutar nuevamente el escáner I2C para ver qué direcciones detecta. Esto puede ayudarte a confirmar si la dirección `0x34` desaparece cuando la pantalla OLED no está conectada.
+
+3. **Confirmación de Dirección**: Si al reconectar la pantalla OLED vuelve a detectar las direcciones `0x34` y `0x3C`, es posible que haya algún problema con la dirección de la pantalla OLED. Asegúrate de que estás usando la dirección correcta (`0x3C` o `0x3D` dependiendo del modelo exacto de tu pantalla OLED SSD1306).
+
+4. **Prueba de Funcionamiento**: Una vez que estés seguro de la dirección correcta (`0x3C` en este caso), asegúrate de que el código de la pantalla OLED esté configurado correctamente con esa dirección.
+
+### Código para la Pantalla OLED
+
+Asegúrate de usar la dirección I2C correcta en el siguiente código para la pantalla OLED:
+
+```cpp
+#include <Wire.h>
+#include <Adafruit_GFX.h>
+#include <Adafruit_SSD1306.h>
+
+#define SCREEN_WIDTH 128
+#define SCREEN_HEIGHT 64
+
+// Dirección I2C de la pantalla OLED (ajusta según lo detectado)
+#define OLED_ADDRESS 0x3C
+
+Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
+
+void setup() {
+  Wire.begin();
+  Serial.begin(115200);
+  while (!Serial); // Esperar a que el puerto serial esté listo
+  
+  // Inicializar la pantalla OLED
+  if(!display.begin(SSD1306_SWITCHCAPVCC, OLED_ADDRESS)) {
+    Serial.println(F("No se pudo inicializar la pantalla OLED"));
+    for(;;);
+  }
+
+  Serial.println("Pantalla OLED inicializada");
+
+  // Limpiar la pantalla
+  display.clearDisplay();
+
+  // Configurar el tamaño del texto y color
+  display.setTextSize(1);
+  display.setTextColor(SSD1306_WHITE);
+
+  // Escribir en la pantalla
+  display.setCursor(0, 0);
+  display.println("Hola Mundo!");
+
+  // Mostrar en la pantalla
+  display.display();
+}
+
+void loop() {
+  // No hay acción en el loop
+}
+```
+
+### Verificación Final
+
+- **Dirección Correcta**: Asegúrate de que `OLED_ADDRESS` esté configurado correctamente con la dirección que esperas (`0x3C` o `0x3D`).
+- **Conexiones**: Verifica que los cables SDA y SCL estén conectados correctamente a los pines correspondientes del TTGO T-Beam (generalmente GPIO 21 para SDA y GPIO 22 para SCL).
+- **Ejecución del Escáner I2C**: Si sigues viendo ambas direcciones (`0x34` y `0x3C`), verifica nuevamente las conexiones y considera revisar si hay algún problema con la detección del bus I2C.
+
+Siguiendo estos pasos deberías poder resolver los problemas y hacer que la pantalla OLED funcione correctamente con tu TTGO T-Beam.
